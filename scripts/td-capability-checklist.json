@@ -1,0 +1,121 @@
+{
+  "version": "1.1",
+  "name": "td-mcp-capability-checklist",
+  "bridge_required": true,
+  "defaults": {
+    "timeout_ms": 5000
+  },
+  "phases": [
+    {
+      "name": "connectivity",
+      "steps": [
+        { "id": "td_connect", "tool": "td_connect", "requires_bridge": false, "args": { "url": "ws://127.0.0.1:9981", "timeout_ms": 5000 } },
+        { "id": "td_bridge_ping", "tool": "td_bridge_ping", "depends_on": ["td_connect"], "args": {} },
+        { "id": "td_status", "tool": "td_status", "depends_on": ["td_connect"], "args": {} },
+        { "id": "td_bridge_state", "tool": "td_bridge_state", "requires_bridge": false, "args": {} }
+      ]
+    },
+    {
+      "name": "workspace_reset_dry_run",
+      "steps": [
+        {
+          "id": "td_test_reset_workspace_dry",
+          "tool": "td_test_reset_workspace",
+          "depends_on": ["td_connect"],
+          "args": { "parent": "/project1", "keep_paths": [], "dry_run": true }
+        }
+      ]
+    },
+    {
+      "name": "graph_core",
+      "steps": [
+        { "id": "td_create_const", "tool": "td_create_op", "depends_on": ["td_connect"], "args": { "parent": "/project1", "type": "constantCHOP", "name": "mcp_test_const" } },
+        { "id": "td_create_null", "tool": "td_create_op", "depends_on": ["td_create_const"], "args": { "parent": "/project1", "type": "nullCHOP", "name": "mcp_test_null" } },
+        { "id": "td_set_param", "tool": "td_set_param", "depends_on": ["td_create_const"], "args": { "path": "/project1/mcp_test_const", "param": "value0", "value": 0.25 } },
+        { "id": "td_connect_ops", "tool": "td_connect_ops", "depends_on": ["td_create_const", "td_create_null"], "args": { "out": "/project1/mcp_test_const", "into": "/project1/mcp_test_null", "index": 0 } },
+        { "id": "td_op_info", "tool": "td_op_info", "depends_on": ["td_create_null"], "args": { "path": "/project1/mcp_test_null" } },
+        { "id": "td_list_nodes", "tool": "td_list_nodes", "depends_on": ["td_connect"], "args": { "parent": "/project1", "pattern": "mcp_test_*", "include_properties": true, "limit": 50 } },
+        { "id": "td_node_errors", "tool": "td_node_errors", "depends_on": ["td_connect"], "args": { "path": "/project1", "include_children": true, "limit": 100 } },
+        { "id": "td_export_snapshot", "tool": "td_export_snapshot", "depends_on": ["td_create_const", "td_create_null"], "args": { "paths": ["/project1/mcp_test_const", "/project1/mcp_test_null"], "include_params": true, "include_children": false } }
+      ]
+    },
+    {
+      "name": "methods_eval_script",
+      "steps": [
+        { "id": "td_exec_node_method", "tool": "td_exec_node_method", "depends_on": ["td_create_const"], "args": { "path": "/project1/mcp_test_const", "method": "cook", "args": [], "kwargs": {} } },
+        { "id": "td_eval", "tool": "td_eval", "depends_on": ["td_create_const"], "args": { "expression": "op('/project1/mcp_test_const').par.value0.eval()" } },
+        { "id": "td_run_script_policy_block", "tool": "td_run_script", "depends_on": ["td_create_const"], "args": { "code": "op('/project1/mcp_test_const').par.value0 = 0.9" }, "expect_failure": true }
+      ]
+    },
+    {
+      "name": "timeline_project_perf",
+      "steps": [
+        { "id": "td_timeline_play", "tool": "td_timeline_play", "depends_on": ["td_connect"], "args": {} },
+        { "id": "td_timeline_stop", "tool": "td_timeline_stop", "depends_on": ["td_timeline_play"], "args": {} },
+        { "id": "td_capture_performance", "tool": "td_capture_performance", "depends_on": ["td_connect"], "args": { "duration_frames": 120 } },
+        { "id": "td_save_project_policy_block", "tool": "td_save_project", "depends_on": ["td_connect"], "args": {}, "expect_failure": true }
+      ]
+    },
+    {
+      "name": "batch_and_plan",
+      "steps": [
+        {
+          "id": "td_execute_batch",
+          "tool": "td_execute_batch",
+          "depends_on": ["td_connect"],
+          "args": {
+            "operations": [
+              { "id": "b1", "action": "create_op", "data": { "parent": "/project1", "type": "constantCHOP", "name": "mcp_batch_const" } },
+              { "id": "b2", "action": "create_op", "data": { "parent": "/project1", "type": "nullCHOP", "name": "mcp_batch_null" } },
+              { "id": "b3", "action": "connect_ops", "data": { "out": "/project1/mcp_batch_const", "into": "/project1/mcp_batch_null", "index": 0 } }
+            ],
+            "stop_on_error": true,
+            "rollback_on_failure": "best_effort",
+            "timeout_ms": 5000
+          }
+        },
+        {
+          "id": "td_plan_network_changes",
+          "tool": "td_plan_network_changes",
+          "depends_on": ["td_connect"],
+          "args": {
+            "operations": [
+              { "action": "create_op", "data": { "parent": "/project1", "type": "nullCHOP", "name": "mcp_plan_null" } },
+              { "action": "set_param", "data": { "path": "/project1/mcp_plan_null", "param": "cooktype", "value": "selective" } }
+            ]
+          },
+          "capture": [
+            { "json_path": "data.plan_id", "as": "last_plan_id" }
+          ]
+        },
+        {
+          "id": "td_apply_network_changes",
+          "tool": "td_apply_network_changes",
+          "depends_on": ["td_plan_network_changes"],
+          "args": {
+            "plan_id": "${last_plan_id}",
+            "rollback_on_failure": "best_effort",
+            "timeout_ms": 5000,
+            "delete_after_apply": true
+          }
+        }
+      ]
+    },
+    {
+      "name": "alias_compatibility",
+      "steps": [
+        { "id": "alias_create_td_node", "tool": "create_td_node", "depends_on": ["td_connect"], "args": { "parentPath": "/project1", "nodeType": "constantCHOP", "nodeName": "mcp_alias_const" } },
+        { "id": "alias_get_td_nodes", "tool": "get_td_nodes", "depends_on": ["alias_create_td_node"], "args": { "parentPath": "/project1", "pattern": "mcp_alias_*", "includeProperties": true, "limit": 20 } },
+        { "id": "alias_update_td_node_parameters", "tool": "update_td_node_parameters", "depends_on": ["alias_create_td_node"], "args": { "nodePath": "/project1/mcp_alias_const", "properties": { "value0": 0.33 } } },
+        { "id": "alias_exec_node_method", "tool": "exec_node_method", "depends_on": ["alias_create_td_node"], "args": { "nodePath": "/project1/mcp_alias_const", "method": "cook", "args": [], "kwargs": {} } }
+      ]
+    },
+    {
+      "name": "cleanup_policy_sensitive",
+      "steps": [
+        { "id": "td_delete_op_policy_block", "tool": "td_delete_op", "depends_on": ["td_connect"], "args": { "path": "/project1/mcp_test_null" }, "expect_failure": true },
+        { "id": "alias_delete_td_node_policy_block", "tool": "delete_td_node", "depends_on": ["td_connect"], "args": { "nodePath": "/project1/mcp_alias_const" }, "expect_failure": true }
+      ]
+    }
+  ]
+}

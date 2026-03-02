@@ -1,5 +1,12 @@
 # Dependencies
 node_modules/
+results/
+td-bridge/__pycache__/
+fix.js
+fix.cjs
+fix2.cjs
+fix3.cjs
+wiki/data/search-index/*.json
 
 # Logs
 *.log
