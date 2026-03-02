@@ -11,7 +11,9 @@
     "start": "node index.js",
     "capability-check": "node scripts/run-td-mcp-capability-check.js",
     "capability-check:failfast": "node scripts/run-td-mcp-capability-check.js --fail-fast",
-    "release-gate": "npm run capability-check"
+    "release-gate": "npm run capability-check",
+    "session-boot": "node scripts/session-boot-check.js",
+    "session-boot:full": "node scripts/session-boot-check.js --full"
   },
   "keywords": [
     "mcp",

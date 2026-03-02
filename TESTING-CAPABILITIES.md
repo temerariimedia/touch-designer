@@ -21,6 +21,23 @@ The runner launches this MCP server via stdio and executes tool calls end-to-end
 npm run capability-check
 ```
 
+Session startup shortcut:
+
+```bash
+npm run session-boot
+```
+
+This does:
+
+1. checks TD bridge reachability on `127.0.0.1:9981`
+2. runs a fast regression gate (`capability-check:failfast`)
+
+Full startup gate:
+
+```bash
+npm run session-boot:full
+```
+
 Release blocker gate:
 
 ```bash
