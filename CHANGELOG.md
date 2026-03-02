@@ -5,6 +5,59 @@ All notable changes to the TouchDesigner MCP Server will be documented in this f
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.7.0] - 2026-03-01
+
+### Added
+- Hybrid MCP runtime with dual transport support:
+  - `stdio` mode (default)
+  - streamable HTTP mode (`--transport=http`, `--mcp-http-port`, `--mcp-http-host`)
+- Live control reliability tools:
+  - `td_bridge_state`
+  - `td_bridge_ping`
+- New live control/diagnostic tools:
+  - `td_list_nodes`
+  - `td_node_errors`
+  - `td_exec_node_method`
+  - `td_execute_batch`
+  - `td_plan_network_changes`
+  - `td_apply_network_changes`
+  - `td_describe_tools`
+  - `td_export_snapshot`
+  - `td_capture_performance`
+  - `td_test_reset_workspace`
+- Ecosystem compatibility aliases:
+  - `create_td_node`, `delete_td_node`, `execute_python_script`
+  - `get_td_info`, `get_td_nodes`, `get_td_node_errors`, `get_td_node_parameters`
+  - `update_td_node_parameters`, `exec_node_method`, `describe_td_tools`
+- Capability guardrails and policy config:
+  - `config/td-capabilities.json`
+  - env overrides (`TD_ALLOW_*`)
+- New setup doc:
+  - `LIVE-CONTROL-SETUP.md`
+  - `TESTING-CAPABILITIES.md`
+
+### Changed
+- WebSocket bridge client now includes:
+  - connection state reporting
+  - heartbeat pings
+  - reconnect backoff attempts
+- TouchDesigner callback bridge now supports:
+  - `ping`
+  - `list_nodes`
+  - `node_errors`
+  - `exec_node_method`
+  - response metadata including request duration
+
+### Security
+- Dangerous operations are now policy-gated by default:
+  - script execution disabled by default
+  - destructive/project I/O disabled by default
+- `td_test_reset_workspace` now allows `dry_run=true` without destructive capability; destructive mode still requires `allow_destructive_ops`
+
+### Testing
+- Capability runner now classifies bridge-down as `infra_blocker` and blocks dependent steps instead of cascading functional failures
+- Added richer step statuses and summary fields in capability reports
+
 ## [2.6.1] - 2025-01-16
 
 ### 🐍 Critical Python API Fixes

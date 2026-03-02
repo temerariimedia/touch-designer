@@ -1,0 +1,7 @@
+{
+  "allow_eval": true,
+  "allow_network_mutation": true,
+  "allow_script_execution": false,
+  "allow_destructive_ops": false,
+  "allow_project_io": false
+}

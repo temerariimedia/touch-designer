@@ -8,7 +8,10 @@
     "td-mcp": "./index.js"
   },
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "capability-check": "node scripts/run-td-mcp-capability-check.js",
+    "capability-check:failfast": "node scripts/run-td-mcp-capability-check.js --fail-fast",
+    "release-gate": "npm run capability-check"
   },
   "keywords": [
     "mcp",
@@ -40,17 +43,26 @@
   "homepage": "https://github.com/bottobot/touchdesigner-mcp-server#readme",
   "files": [
     "index.js",
+    "config/",
+    "bridge/",
+    "security/",
+    "scripts/",
+    "td-bridge/",
     "tools/",
     "data/",
     "wiki/data/",
     "wiki/processor/",
     "README.md",
+    "LIVE-CONTROL-SETUP.md",
+    "TESTING-CAPABILITIES.md",
     "CHANGELOG.md",
     "SETUP-INSTRUCTIONS.md"
   ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
     "cheerio": "^1.0.0-rc.12",
+    "express": "^4.22.1",
+    "ws": "^8.19.0",
     "zod": "^3.23.8"
   },
   "engines": {
