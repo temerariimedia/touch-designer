@@ -11,7 +11,6 @@ wiki/data/search-index/*.json
 # Logs
 *.log
 npm-debug.log*
-
 # Editor directories and files
 .idea
 .vscode
@@ -20,11 +19,16 @@ npm-debug.log*
 *.njsproj
 *.sln
 *.sw?
-
 # OS files
 .DS_Store
 Thumbs.db
-
 # Test coverage
 coverage/
 .nyc_output/
+# Local project MCP config (personal; do not publish). See .mcp.json.example for a td-mcp sample.
+.mcp.json
+# Working/modernization artifacts (not for publish)
+.modernization-backup/
+# Python build artifacts
+__pycache__/
+*.pyc

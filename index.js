@@ -20,6 +20,20 @@ import * as getTutorialTool from "./tools/get_tutorial.js";
 import * as listTutorialsTool from "./tools/list_tutorials.js";
 import * as getPythonApiTool from "./tools/get_python_api.js";
 import * as searchPythonApiTool from "./tools/search_python_api.js";
+// Upstream v3 documentation tools (merged 2026-11-19; upstream's own live-control tools are NOT registered — ours are)
+import * as searchTutorialsTool from "./tools/search_tutorials.js";
+import * as getOperatorExamplesTool from "./tools/get_operator_examples.js";
+import * as listPythonClassesTool from "./tools/list_python_classes.js";
+import * as compareOperatorsTool from "./tools/compare_operators.js";
+import * as getVersionInfoTool from "./tools/get_version_info.js";
+import * as listVersionsTool from "./tools/list_versions.js";
+import * as getExperimentalTechniquesTool from "./tools/get_experimental_techniques.js";
+import * as searchExperimentalTool from "./tools/search_experimental.js";
+import * as getGlslPatternTool from "./tools/get_glsl_pattern.js";
+import * as getOperatorConnectionsTool from "./tools/get_operator_connections.js";
+import * as getNetworkTemplateTool from "./tools/get_network_template.js";
+import * as getExperimentalBuildTool from "./tools/get_experimental_build.js";
+import * as listExperimentalBuildsTool from "./tools/list_experimental_builds.js";
 
 import TdBridgeClient from "./bridge/td-bridge-client.js";
 import CapabilityManager from "./security/capability-manager.js";
@@ -174,6 +188,84 @@ function registerCoreTools(server) {
     "search_python_api",
     searchPythonApiTool.schema,
     async (params) => await searchPythonApiTool.handler(params, { operatorDataManager })
+  );
+
+  server.registerTool(
+    "search_tutorials",
+    searchTutorialsTool.schema,
+    async (params) => await searchTutorialsTool.handler(params, { operatorDataManager })
+  );
+
+  server.registerTool(
+    "get_operator_examples",
+    getOperatorExamplesTool.schema,
+    async (params) => await getOperatorExamplesTool.handler(params, { operatorDataManager })
+  );
+
+  server.registerTool(
+    "list_python_classes",
+    listPythonClassesTool.schema,
+    async (params) => await listPythonClassesTool.handler(params, { operatorDataManager })
+  );
+
+  server.registerTool(
+    "compare_operators",
+    compareOperatorsTool.schema,
+    async (params) => await compareOperatorsTool.handler(params, { operatorDataManager })
+  );
+
+  server.registerTool(
+    "get_version_info",
+    getVersionInfoTool.schema,
+    async (params) => await getVersionInfoTool.handler(params, {})
+  );
+
+  server.registerTool(
+    "list_versions",
+    listVersionsTool.schema,
+    async (params) => await listVersionsTool.handler(params, {})
+  );
+
+  server.registerTool(
+    "get_experimental_techniques",
+    getExperimentalTechniquesTool.schema,
+    async (params) => await getExperimentalTechniquesTool.handler(params)
+  );
+
+  server.registerTool(
+    "search_experimental",
+    searchExperimentalTool.schema,
+    async (params) => await searchExperimentalTool.handler(params)
+  );
+
+  server.registerTool(
+    "get_glsl_pattern",
+    getGlslPatternTool.schema,
+    async (params) => await getGlslPatternTool.handler(params)
+  );
+
+  server.registerTool(
+    "get_operator_connections",
+    getOperatorConnectionsTool.schema,
+    async (params) => await getOperatorConnectionsTool.handler(params, {})
+  );
+
+  server.registerTool(
+    "get_network_template",
+    getNetworkTemplateTool.schema,
+    async (params) => await getNetworkTemplateTool.handler(params, {})
+  );
+
+  server.registerTool(
+    "get_experimental_build",
+    getExperimentalBuildTool.schema,
+    async (params) => await getExperimentalBuildTool.handler(params, {})
+  );
+
+  server.registerTool(
+    "list_experimental_builds",
+    listExperimentalBuildsTool.schema,
+    async (params) => await listExperimentalBuildsTool.handler(params, {})
   );
 }
 
