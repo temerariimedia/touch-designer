@@ -1,0 +1,13 @@
+{
+  "name": "td-verify-proc",
+  "phases": [
+    {
+      "name": "verify",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {"id":"root_nodes","tool":"get_td_nodes","depends_on":["td_connect"],"args":{"parentPath":"/project1","pattern":"proc_*","includeProperties":false,"limit":200}},
+        {"id":"geo_children","tool":"get_td_nodes","depends_on":["td_connect"],"args":{"parentPath":"/project1/proc_geo","pattern":"*","includeProperties":false,"limit":200}}
+      ]
+    }
+  ]
+}

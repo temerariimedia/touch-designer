@@ -1,0 +1,27 @@
+{
+  "name": "td-exec-python-once",
+  "phases": [
+    {
+      "name": "execute",
+      "steps": [
+        {
+          "id": "td_connect",
+          "tool": "td_connect",
+          "requires_bridge": false,
+          "args": {
+            "url": "ws://127.0.0.1:9981",
+            "timeout_ms": 5000
+          }
+        },
+        {
+          "id": "execute_python_script",
+          "tool": "execute_python_script",
+          "depends_on": ["td_connect"],
+          "args": {
+            "script": "op('/project1/proc_geo').outputConnectors[0].connect(op('/project1/proc_render')); geo=op('/project1/proc_geo'); [c.destroy() for c in list(geo.children)]; s1=geo.create(sphereSOP,'sphere'); s2=geo.create(torusSOP,'torus'); sw=geo.create(switchSOP,'selector'); n=geo.create(noiseSOP,'distort'); out=geo.create(nullSOP,'render_out'); s1.outputConnectors[0].connect(sw.inputConnectors[0]); s2.outputConnectors[0].connect(sw.inputConnectors[1]); sw.outputConnectors[0].connect(n.inputConnectors[0]); n.outputConnectors[0].connect(out.inputConnectors[0]); geo.par.soppath=out.path; sw.par.index.expr=\"1 if op('/project1/proc_ctrl')[0] > 0 else 0\"; geo.par.ry.expr='absTime.seconds*40'"
+          }
+        }
+      ]
+    }
+  ]
+}

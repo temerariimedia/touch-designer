@@ -1,0 +1,12 @@
+{
+  "name": "td-op-info-selector",
+  "phases": [
+    {
+      "name": "inspect",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {"id":"info","tool":"td_op_info","depends_on":["td_connect"],"args":{"path":"/project1/proc_geo/selector"}}
+      ]
+    }
+  ]
+}

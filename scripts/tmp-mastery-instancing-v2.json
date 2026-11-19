@@ -1,0 +1,55 @@
+{
+  "name": "td-mastery-instancing-v2",
+  "phases": [
+    {
+      "name": "build",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+
+        {"id":"mk_geo","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"geometryCOMP","name":"inst_geo"}},
+        {"id":"mk_cam","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"cameraCOMP","name":"inst_cam"}},
+        {"id":"mk_light","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"lightCOMP","name":"inst_light"}},
+        {"id":"mk_render","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"renderTOP","name":"inst_render"}},
+        {"id":"mk_blur","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"lumaBlurTOP","name":"inst_luma_blur"}},
+        {"id":"mk_out","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"nullTOP","name":"FINAL_OUT"}},
+
+        {"id":"mk_box","tool":"td_create_op","depends_on":["mk_geo"],"args":{"parent":"/project1/inst_geo","type":"boxSOP","name":"instance_box"}},
+        {"id":"mk_grid","tool":"td_create_op","depends_on":["mk_geo"],"args":{"parent":"/project1/inst_geo","type":"gridSOP","name":"instance_grid"}},
+        {"id":"mk_s2c","tool":"td_create_op","depends_on":["mk_geo"],"args":{"parent":"/project1/inst_geo","type":"soptoCHOP","name":"grid_to_chop"}},
+        {"id":"mk_noise","tool":"td_create_op","depends_on":["mk_geo"],"args":{"parent":"/project1/inst_geo","type":"noiseCHOP","name":"inst_noise"}},
+        {"id":"mk_merge","tool":"td_create_op","depends_on":["mk_geo"],"args":{"parent":"/project1/inst_geo","type":"mergeCHOP","name":"inst_merge"}},
+        {"id":"mk_chop_out","tool":"td_create_op","depends_on":["mk_geo"],"args":{"parent":"/project1/inst_geo","type":"nullCHOP","name":"inst_chop_out"}},
+
+        {"id":"set_grid_rows","tool":"td_set_param","depends_on":["mk_grid"],"args":{"path":"/project1/inst_geo/instance_grid","param":"rows","value":20}},
+        {"id":"set_grid_cols","tool":"td_set_param","depends_on":["mk_grid"],"args":{"path":"/project1/inst_geo/instance_grid","param":"cols","value":20}},
+        {"id":"set_s2c_sop","tool":"td_set_param","depends_on":["mk_s2c"],"args":{"path":"/project1/inst_geo/grid_to_chop","param":"sop","value":"/project1/inst_geo/instance_grid"}},
+        {"id":"set_s2c_chan","tool":"td_set_param","depends_on":["mk_s2c"],"args":{"path":"/project1/inst_geo/grid_to_chop","param":"channame","value":"tx ty tz"}},
+        {"id":"set_noise_chan","tool":"td_set_param","depends_on":["mk_noise"],"args":{"path":"/project1/inst_geo/inst_noise","param":"channame","value":"scale colorr colorg colorb"}},
+        {"id":"set_noise_amp","tool":"td_set_param","depends_on":["mk_noise"],"args":{"path":"/project1/inst_geo/inst_noise","param":"amp","value":0.5}},
+        {"id":"set_noise_period","tool":"td_set_param","depends_on":["mk_noise"],"args":{"path":"/project1/inst_geo/inst_noise","param":"period","value":6}},
+
+        {"id":"w_grid_to_s2c","tool":"td_connect_ops","depends_on":["mk_grid","mk_s2c"],"args":{"out":"/project1/inst_geo/instance_grid","into":"/project1/inst_geo/grid_to_chop","index":0}},
+        {"id":"w_s2c_to_merge","tool":"td_connect_ops","depends_on":["mk_s2c","mk_merge"],"args":{"out":"/project1/inst_geo/grid_to_chop","into":"/project1/inst_geo/inst_merge","index":0}},
+        {"id":"w_noise_to_merge","tool":"td_connect_ops","depends_on":["mk_noise","mk_merge"],"args":{"out":"/project1/inst_geo/inst_noise","into":"/project1/inst_geo/inst_merge","index":1}},
+        {"id":"w_merge_to_out","tool":"td_connect_ops","depends_on":["mk_merge","mk_chop_out"],"args":{"out":"/project1/inst_geo/inst_merge","into":"/project1/inst_geo/inst_chop_out","index":0}},
+
+        {"id":"set_render_camera","tool":"td_set_param","depends_on":["mk_render","mk_cam"],"args":{"path":"/project1/inst_render","param":"camera","value":"/project1/inst_cam"}},
+        {"id":"set_render_light","tool":"td_set_param","depends_on":["mk_render","mk_light"],"args":{"path":"/project1/inst_render","param":"lights","value":"/project1/inst_light"}},
+        {"id":"set_render_geo","tool":"td_set_param","depends_on":["mk_render","mk_geo"],"args":{"path":"/project1/inst_render","param":"geometry","value":"/project1/inst_geo"}},
+        {"id":"w_render_blur","tool":"td_connect_ops","depends_on":["mk_render","mk_blur"],"args":{"out":"/project1/inst_render","into":"/project1/inst_luma_blur","index":0}},
+        {"id":"w_blur_out","tool":"td_connect_ops","depends_on":["mk_blur","mk_out"],"args":{"out":"/project1/inst_luma_blur","into":"/project1/FINAL_OUT","index":0}},
+
+        {"id":"set_instance_mode","tool":"execute_python_script","depends_on":["mk_geo","mk_chop_out"],"args":{"script":"geo=op('/project1/inst_geo'); c=op('/project1/inst_geo/inst_chop_out'); geo.par.instance=1 if hasattr(geo.par,'instance') else None; geo.par.instancing=1 if hasattr(geo.par,'instancing') else None; geo.par.instanceop=c.path if hasattr(geo.par,'instanceop') else None; geo.par.instancingop=c.path if hasattr(geo.par,'instancingop') else None; geo.par.itx='tx' if hasattr(geo.par,'itx') else None; geo.par.ity='ty' if hasattr(geo.par,'ity') else None; geo.par.itz='tz' if hasattr(geo.par,'itz') else None; geo.par.iscale='scale' if hasattr(geo.par,'iscale') else None; geo.par.iusecolor=True if hasattr(geo.par,'iusecolor') else None; geo.par.icolorr='colorr' if hasattr(geo.par,'icolorr') else None; geo.par.icolorg='colorg' if hasattr(geo.par,'icolorg') else None; geo.par.icolorb='colorb' if hasattr(geo.par,'icolorb') else None"}}
+      ]
+    },
+    {
+      "name": "verify",
+      "steps": [
+        {"id":"verify_final_out","tool":"td_op_info","depends_on":["w_blur_out"],"args":{"path":"/project1/FINAL_OUT"}},
+        {"id":"verify_blur","tool":"td_op_info","depends_on":["w_render_blur"],"args":{"path":"/project1/inst_luma_blur"}},
+        {"id":"verify_geo","tool":"td_op_info","depends_on":["mk_geo"],"args":{"path":"/project1/inst_geo"}},
+        {"id":"verify_errors","tool":"get_td_node_errors","depends_on":["set_instance_mode"],"args":{"nodePath":"/project1/inst_geo","includeChildren":true,"limit":100}}
+      ]
+    }
+  ]
+}

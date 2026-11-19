@@ -1,0 +1,13 @@
+{
+  "name": "td-create-string-test",
+  "phases": [
+    {
+      "name": "test",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {"id":"exec","tool":"execute_python_script","depends_on":["td_connect"],"args":{"script":"p=op('/project1'); t=p.op('zz_tmp_geo') or p.create('geoCOMP','zz_tmp_geo')"}},
+        {"id":"info","tool":"td_op_info","depends_on":["exec"],"args":{"path":"/project1/zz_tmp_geo"}}
+      ]
+    }
+  ]
+}

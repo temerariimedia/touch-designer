@@ -1,0 +1,14 @@
+{
+  "name": "td-mastery-instancing-finalize",
+  "phases": [
+    {
+      "name": "finalize",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {"id":"set_instance_mode","tool":"execute_python_script","depends_on":["td_connect"],"args":{"script":"f=lambda n,v: (setattr(getattr(op('/project1/inst_geo').par,n),'val',v) if hasattr(op('/project1/inst_geo').par,n) else None); f('instance',1); f('instancing',1); f('instanceop','/project1/inst_geo/inst_chop_out'); f('instancingop','/project1/inst_geo/inst_chop_out'); f('itx','tx'); f('ity','ty'); f('itz','tz'); f('iscale','scale'); f('iusecolor',True); f('icolorr','colorr'); f('icolorg','colorg'); f('icolorb','colorb')"}},
+        {"id":"verify_out","tool":"td_op_info","depends_on":["set_instance_mode"],"args":{"path":"/project1/FINAL_OUT"}},
+        {"id":"verify_errors","tool":"get_td_node_errors","depends_on":["set_instance_mode"],"args":{"nodePath":"/project1/inst_geo","includeChildren":true,"limit":100}}
+      ]
+    }
+  ]
+}

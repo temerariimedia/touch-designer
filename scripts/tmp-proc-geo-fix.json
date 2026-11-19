@@ -1,0 +1,20 @@
+{
+  "name": "td-proc-geo-fix",
+  "phases": [
+    {
+      "name": "fix",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {
+          "id":"fix_script",
+          "tool":"execute_python_script",
+          "depends_on":["td_connect"],
+          "args":{
+            "script":"geo=op('/project1/proc_geo'); sw=op('/project1/proc_geo/selector'); mat=op('/project1/proc_mat'); geo.par.ry.expr='absTime.seconds*40'; sw.par.input.expr=\"1 if op('/project1/proc_ctrl')[0] > 0 else 0\"; (setattr(geo.par,'material',mat.path) if hasattr(geo.par,'material') else setattr(geo.par,'mat',mat.path))"
+          }
+        },
+        {"id":"node_errors","tool":"get_td_node_errors","depends_on":["fix_script"],"args":{"nodePath":"/project1/proc_geo","includeChildren":true,"limit":50}}
+      ]
+    }
+  ]
+}

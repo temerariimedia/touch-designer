@@ -1,0 +1,14 @@
+{
+  "name": "td-inspect-instancing-params",
+  "phases": [
+    {
+      "name": "inspect",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {"id":"s2c","tool":"td_op_info","depends_on":["td_connect"],"args":{"path":"/project1/inst_geo/grid_to_chop"}},
+        {"id":"noise","tool":"td_op_info","depends_on":["td_connect"],"args":{"path":"/project1/inst_geo/inst_noise"}},
+        {"id":"geo","tool":"td_op_info","depends_on":["td_connect"],"args":{"path":"/project1/inst_geo"}}
+      ]
+    }
+  ]
+}

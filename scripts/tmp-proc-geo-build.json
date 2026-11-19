@@ -1,0 +1,19 @@
+{
+  "name": "td-proc-geo-build",
+  "phases": [
+    {
+      "name": "build",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {
+          "id":"exec_script",
+          "tool":"execute_python_script",
+          "depends_on":["td_connect"],
+          "args":{
+            "script":"p=op('/project1'); geo=p.op('proc_geo') or p.create(geoCOMP,'proc_geo'); rnd=p.op('proc_render') or p.create(renderTOP,'proc_render'); out_top=p.op('proc_out') or p.create(nullTOP,'proc_out'); ctrl=p.op('proc_ctrl') or p.create(lfoCHOP,'proc_ctrl'); cam=p.op('proc_cam') or p.create(cameraCOMP,'proc_cam'); light=p.op('proc_light') or p.create(lightCOMP,'proc_light'); mat=p.op('proc_mat') or p.create(phongMAT,'proc_mat'); rnd.par.camera=cam.path; rnd.par.lights=light.path; out_top.inputConnectors[0].connect(rnd); [c.destroy() for c in list(geo.children)]; s1=geo.create(sphereSOP,'sphere'); s2=geo.create(torusSOP,'torus'); sw=geo.create(switchSOP,'selector'); n=geo.create(noiseSOP,'distort'); sop_out=geo.create(nullSOP,'render_out'); sw.inputConnectors[0].connect(s1); sw.inputConnectors[1].connect(s2); n.inputConnectors[0].connect(sw); sop_out.inputConnectors[0].connect(n); s1.render=False; s1.display=False; s2.render=False; s2.display=False; sw.render=False; sw.display=False; n.render=False; n.display=False; sop_out.render=True; sop_out.display=True; geo.par.ry.expr='absTime.seconds*40'; sw.par.index.expr=\"1 if op('/project1/proc_ctrl')[0] > 0 else 0\"; geo.par.material=mat.path"
+          }
+        }
+      ]
+    }
+  ]
+}

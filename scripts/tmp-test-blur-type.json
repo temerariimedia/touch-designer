@@ -1,0 +1,14 @@
+{
+  "name": "td-test-blur-type",
+  "phases": [
+    {
+      "name": "test",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {"id":"t1","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"blurTOP","name":"zz_blur1"},"expect_failure":true},
+        {"id":"t2","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"lumablurTOP","name":"zz_blur2"},"expect_failure":true},
+        {"id":"t3","tool":"td_create_op","depends_on":["td_connect"],"args":{"parent":"/project1","type":"lumaBlurTOP","name":"zz_blur3"},"expect_failure":true}
+      ]
+    }
+  ]
+}

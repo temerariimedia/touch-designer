@@ -1,0 +1,56 @@
+{
+  "name": "td-mastery-instancing",
+  "phases": [
+    {
+      "name": "build",
+      "steps": [
+        {
+          "id": "td_connect",
+          "tool": "td_connect",
+          "requires_bridge": false,
+          "args": {
+            "url": "ws://127.0.0.1:9981",
+            "timeout_ms": 5000
+          }
+        },
+        {
+          "id": "build_instancing",
+          "tool": "execute_python_script",
+          "depends_on": ["td_connect"],
+          "args": {
+            "script": "p=op('/project1'); geo=p.op('inst_geo') or p.create(geoCOMP,'inst_geo'); cam=p.op('inst_cam') or p.create(cameraCOMP,'inst_cam'); light=p.op('inst_light') or p.create(lightCOMP,'inst_light'); render=p.op('inst_render') or p.create(renderTOP,'inst_render'); blur=p.op('inst_luma_blur') or p.create(lumaBlurTOP,'inst_luma_blur'); out=p.op('FINAL_OUT') or p.create(nullTOP,'FINAL_OUT'); [c.destroy() for c in list(geo.children)]; box=geo.create(boxSOP,'instance_box'); grid=geo.create(gridSOP,'instance_grid'); grid.par.rows=20; grid.par.cols=20; sop_to_chop=geo.create(soptoCHOP,'grid_to_chop'); sop_to_chop.par.sop=grid.path; sop_to_chop.par.channame='tx ty tz'; noise=geo.create(noiseCHOP,'inst_noise'); noise.par.channame='scale colorr colorg colorb'; noise.par.period=6; noise.par.amp=0.5; merge=geo.create(mergeCHOP,'inst_merge'); merge.inputConnectors[0].connect(sop_to_chop); merge.inputConnectors[1].connect(noise); null_chop=geo.create(nullCHOP,'inst_chop_out'); null_chop.inputConnectors[0].connect(merge); box.render=True; box.display=True; grid.render=False; grid.display=False; geo.par.instance=1 if hasattr(geo.par,'instance') else None; geo.par.instancing=1 if hasattr(geo.par,'instancing') else None; geo.par.instanceop=null_chop.path if hasattr(geo.par,'instanceop') else None; geo.par.instancingop=null_chop.path if hasattr(geo.par,'instancingop') else None; geo.par.itx='tx' if hasattr(geo.par,'itx') else None; geo.par.ity='ty' if hasattr(geo.par,'ity') else None; geo.par.itz='tz' if hasattr(geo.par,'itz') else None; geo.par.iscale='scale' if hasattr(geo.par,'iscale') else None; geo.par.iusecolor=True if hasattr(geo.par,'iusecolor') else None; geo.par.icolorr='colorr' if hasattr(geo.par,'icolorr') else None; geo.par.icolorg='colorg' if hasattr(geo.par,'icolorg') else None; geo.par.icolorb='colorb' if hasattr(geo.par,'icolorb') else None; render.par.camera=cam.path; render.par.lights=light.path; render.par.geometry=geo.path; blur.inputConnectors[0].connect(render); out.inputConnectors[0].connect(blur); cam.par.tz=18 if hasattr(cam.par,'tz') else None; light.par.tx=3 if hasattr(light.par,'tx') else None; light.par.ty=6 if hasattr(light.par,'ty') else None; light.par.tz=8 if hasattr(light.par,'tz') else None"
+          }
+        }
+      ]
+    },
+    {
+      "name": "verify",
+      "steps": [
+        {
+          "id": "verify_final_out",
+          "tool": "td_op_info",
+          "depends_on": ["build_instancing"],
+          "args": {"path": "/project1/FINAL_OUT"}
+        },
+        {
+          "id": "verify_blur",
+          "tool": "td_op_info",
+          "depends_on": ["build_instancing"],
+          "args": {"path": "/project1/inst_luma_blur"}
+        },
+        {
+          "id": "verify_geo",
+          "tool": "td_op_info",
+          "depends_on": ["build_instancing"],
+          "args": {"path": "/project1/inst_geo"}
+        },
+        {
+          "id": "verify_geo_errors",
+          "tool": "get_td_node_errors",
+          "depends_on": ["build_instancing"],
+          "args": {"nodePath": "/project1/inst_geo", "includeChildren": true, "limit": 100}
+        }
+      ]
+    }
+  ]
+}

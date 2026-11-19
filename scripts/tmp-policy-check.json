@@ -1,0 +1,16 @@
+{
+  "name": "td-policy-check",
+  "phases": [
+    {
+      "name": "policy",
+      "steps": [
+        {
+          "id": "td_bridge_state",
+          "tool": "td_bridge_state",
+          "requires_bridge": false,
+          "args": {}
+        }
+      ]
+    }
+  ]
+}

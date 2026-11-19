@@ -13,7 +13,9 @@
     "capability-check:failfast": "node scripts/run-td-mcp-capability-check.js --fail-fast",
     "release-gate": "npm run capability-check",
     "session-boot": "node scripts/session-boot-check.js",
-    "session-boot:full": "node scripts/session-boot-check.js --full"
+    "session-boot:full": "node scripts/session-boot-check.js --full",
+    "td-boot": "npm run session-boot",
+    "td-shape-gen": "node scripts/td-shape-generator.js"
   },
   "keywords": [
     "mcp",

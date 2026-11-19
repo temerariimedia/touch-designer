@@ -1,0 +1,14 @@
+{
+  "name": "td-verify-op-info",
+  "phases": [
+    {
+      "name": "verify",
+      "steps": [
+        {"id":"td_connect","tool":"td_connect","requires_bridge":false,"args":{"url":"ws://127.0.0.1:9981","timeout_ms":5000}},
+        {"id":"geo_info","tool":"td_op_info","depends_on":["td_connect"],"args":{"path":"/project1/proc_geo"}},
+        {"id":"render_info","tool":"td_op_info","depends_on":["td_connect"],"args":{"path":"/project1/proc_render"}},
+        {"id":"ctrl_info","tool":"td_op_info","depends_on":["td_connect"],"args":{"path":"/project1/proc_ctrl"}}
+      ]
+    }
+  ]
+}
