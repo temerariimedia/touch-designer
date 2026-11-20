@@ -32,3 +32,6 @@ coverage/
 # Python build artifacts
 __pycache__/
 *.pyc
+
+# TouchDesigner project files (binary; regenerate with td-bridge/start_bridge.py)
+td-bridge/*.toe
