@@ -5,7 +5,7 @@
 # /project1/td_bridge_ws (Web Server DAT, port 9981, active). Safe to run twice.
 import os
 
-_here = r'C:/Users/temer/experiments/spatial-3d/touch-designer/touchdesigner-mcp-server/td-bridge'
+_here = r'C:/Users/temer/tools/touch-designer/touchdesigner-mcp-server/td-bridge'
 _base = op('/project1')
 _cb = _base.op('td_bridge_callbacks') or _base.create(textDAT, 'td_bridge_callbacks')
 _cb.par.file = os.path.join(_here, 'webserver_callbacks.py').replace('\\', '/')
